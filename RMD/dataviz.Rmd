@@ -1,0 +1,58 @@
+---
+title: "Dataviz"
+author: "Daniel Kreuz"
+date: "9 11 2022"
+output: html_document
+---
+
+```{r Imports}
+
+source("../functions/helpers.R")
+
+library(data.table)
+library(tidyverse)
+library(magrittr)
+library(checkmate)
+
+```
+
+```{r data}
+
+train <- read.csv("../data/training_set_values.csv", stringsAsFactors = TRUE) %>% setDT()
+train_labels <- read.csv("../data/training_set_labels.csv") %>% setDT()
+test <- read.csv("../data/test_set_values.csv", stringsAsFactors = TRUE) %>% setDT()
+submission <- read.csv("../data/SubmissionFormat.csv")
+
+```
+
+```{r First impression}
+
+#Check the data types
+glimpse(train)
+
+##### Results
+# date_recorded should be of type date
+# num_private ??
+# public_meeting should be of type bool
+# permit should be of type bool
+# district code should be of type factor
+# region code should be of type factor
+
+# Change Datatypes via function
+
+train <- change_datatypes(data = train)
+
+assert_logical(train[,public_meeting])
+assert_logical(train[,permit])
+assert_date(train[,date_recorded])
+
+```
+
+```{r Numerical Analysis}
+
+```
+
+
+
+
+
