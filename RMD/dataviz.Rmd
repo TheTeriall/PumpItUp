@@ -13,13 +13,14 @@ library(data.table)
 library(tidyverse)
 library(magrittr)
 library(checkmate)
+library(plotly)
 
 ```
 
 ```{r data}
 
 train <- read.csv("../data/training_set_values.csv", stringsAsFactors = TRUE) %>% setDT()
-train_labels <- read.csv("../data/training_set_labels.csv") %>% setDT()
+train_labels <- read.csv("../data/training_set_labels.csv", stringsAsFactors = TRUE) %>% setDT()
 test <- read.csv("../data/test_set_values.csv", stringsAsFactors = TRUE) %>% setDT()
 submission <- read.csv("../data/SubmissionFormat.csv")
 
@@ -48,7 +49,51 @@ assert_date(train[,date_recorded])
 
 ```
 
+```{r Target distribution}
+
+tgt_dist <- plot_ly(data = train_labels, x = ~status_group) %>%
+  layout(title = "Absolute distribution of the trainings target variable",
+         yaxis = list(title = "Absolute"))
+
+relative_train_labels <- train_labels[, .N, by = .(status_group)]
+relative_train_labels[, rel := round(N / sum(N), digits = 2)]
+
+rel_tgt_dist <- plot_ly(data = relative_train_labels, x = ~status_group, y = ~rel) %>% 
+  layout(title = "Relative distribution of the trainings target variable",
+         yaxis = list(title = "Relative"))
+
+tgt_dist
+rel_tgt_dist
+
+
+
+```
+
+We have a pretty unbalanced distribution in our target variable.
+While the two classes functional and non functional are mostly evenly distributed we have only very few cases (~ 7%) of functional pumps that need repair. 
+This could later lead to problems if our test set has more functional pumps that need repair and our model is not adjusted to this case. 
+
+
+
+
 ```{r Numerical Analysis}
+
+# Cols to review in the numerical analysis
+# amount_tsh, gps_height longitude, latitude, num_private, population
+
+plot_ly(data = train, x = ~log(amount_tsh), type = "histogram") %>%
+  layout(title = "Log Amount of flow in pumps")
+plot_ly(data = train, x = ~gps_height, type = "histogram") %>%
+  layout(title = "The Height of the pumps")
+plot_ly(data = train, x = ~longitude, type = "histogram") %>%
+  layout(title = "Longitude")
+plot_ly(data = train, x = ~latitude, type = "histogram") %>%
+  layout(title = "Latitude")
+plot_ly(data = train, x = ~num_private, type = "histogram") %>%
+  layout(title = "Num Private (Unknown)")
+plot_ly(data = train, x = ~log(population), type = "histogram") %>%
+  layout(title = "Log Population")
+
 
 ```
 
