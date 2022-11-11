@@ -18,6 +18,8 @@ library(checkmate)
 library(plotly)
 library(clinUtils)
 library(janitor)
+library(rcompanion)
+library(DescTools)
 
 ```
 
@@ -221,9 +223,11 @@ What type of waterpoint it is. Need to get information from the internet or stak
 Mostly the sameas waterpoint_type. A little more generalized
 
 
-```{r Join labels}
+```{r Join labels and delete recorded_by}
 
 train <- train[train_labels, on = "id"]
+train <- train[,recorded_by := NULL]
+
 
 ```
 
@@ -279,6 +283,25 @@ fig
 
 We can see only a slight difference in the contractors. Interesting is that the waterpoints funded by the german republic is mostly functional while the others are mostly under 50%.
 We keep this in mind for later steps. We could categorize the different funders in our preparation.
+
+
+## Hypothesis 2: The basin is associated with other variables in the dataset (Cramér's V)
+
+```{r}
+
+fact_cols <- names(Filter(is.factor, train))
+
+for(col in fact_cols[fact_cols != "basin"]){
+  cramer <- cramerV(x = train$basin, y = train[[col]])
+  chisq <- chisq.test(x = train$basin, y = train[[col]])
+  print(paste0("Cramer V for basin ~ ", col, " = ", cramer ," , p-Value = ", chisq["p.value"]))
+}
+
+```
+
+The Cramer's V shows that we have a strong association between the basin and our variables lga und ward. We can therefore keep only one variable.
+We could use some techniques later to find out which variable has more information for our target (Maybe PCA?)
+
 
 
 
