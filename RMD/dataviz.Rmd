@@ -352,6 +352,98 @@ fig
 We have no visible difference between the management of VWC and others.
 
 
+## Hypothesis 5: The functionality is evenly distributed between all the extraction type columns
+
+```{r}
+
+hypo_5 <- copy(train)
+hypo_5[, .N , by = .(extraction_type)][order(-N)]
+melted <- hypo_5[, .N, by = .(extraction_type, status_group)][, rel := N / sum(N), by = .(extraction_type)]
+casted <- dcast(melted, extraction_type ~ status_group, value.var = "rel")
+casted <- casted %>%
+  droplevels() %>%
+  clean_names()
+
+
+fig_1 <- plot_ly(data = casted, x = ~extraction_type, y = ~functional, type = "bar", name = "functional") %>%
+  add_trace(y = ~functional_needs_repair, name = "functional needs repair") %>%
+  add_trace(y = ~non_functional, name = "non functional") %>%
+  layout(yaxis = list(title = "Relative count"), barmode = "stack")
+
+###
+
+hypo_5 <- copy(train)
+hypo_5[, .N , by = .(extraction_type_group)][order(-N)]
+melted <- hypo_5[, .N, by = .(extraction_type_group, status_group)][, rel := N / sum(N), by = .(extraction_type_group)]
+casted <- dcast(melted, extraction_type_group ~ status_group, value.var = "rel")
+casted <- casted %>%
+  droplevels() %>%
+  clean_names()
+
+
+fig_2 <- plot_ly(data = casted, x = ~extraction_type_group, y = ~functional, type = "bar", name = "functional") %>%
+  add_trace(y = ~functional_needs_repair, name = "functional needs repair") %>%
+  add_trace(y = ~non_functional, name = "non functional") %>%
+  layout(yaxis = list(title = "Relative count"), barmode = "stack")
+
+
+###
+
+
+hypo_5 <- copy(train)
+hypo_5[, .N , by = .(extraction_type_class)][order(-N)]
+melted <- hypo_5[, .N, by = .(extraction_type_class, status_group)][, rel := N / sum(N), by = .(extraction_type_class)]
+casted <- dcast(melted, extraction_type_class ~ status_group, value.var = "rel")
+casted <- casted %>%
+  droplevels() %>%
+  clean_names()
+
+
+fig_3 <- plot_ly(data = casted, x = ~extraction_type_class, y = ~functional, type = "bar", name = "functional") %>%
+  add_trace(y = ~functional_needs_repair, name = "functional needs repair") %>%
+  add_trace(y = ~non_functional, name = "non functional") %>%
+  layout(yaxis = list(title = "Relative count"), barmode = "stack")
+
+
+fig_1
+fig_2
+fig_3
+
+
+
+
+
+```
+
+We can see that with the extraction type "other" has mostly non-functional waterpoints. Other than that the distribution is kind of even.
+
+
+## Hypothesis 6: The payment and payment time is redundand.
+
+```{r}
+
+hypo_6 <- train[, .N , by = .(payment)]
+hypo_6_b <- train[, .N, by = .(payment_type)]
+
+hypo_6
+hypo_6_b
+
+```
+
+We can see, that only the named payment or payment type differs in these two values. Therefore we can delete one of those values
+
+```{r}
+
+train[, payment_type := NULL]
+
+```
+
+## Hypothesis 7: The quanity is associated to the functionality of the pump.
+
+
+```{r}
+
+```
 
 
 
