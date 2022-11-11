@@ -2,7 +2,9 @@
 title: "Dataviz"
 author: "Daniel Kreuz"
 date: "9 11 2022"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r Imports}
@@ -14,6 +16,8 @@ library(tidyverse)
 library(magrittr)
 library(checkmate)
 library(plotly)
+library(clinUtils)
+library(janitor)
 
 ```
 
@@ -97,17 +101,19 @@ plot_ly(data = train, x = ~log(population), type = "histogram") %>%
 
 ```
 
-```{r Categorical Analysis}
+```{r Categorical Analysis, results='asis'}
 
 # Plot a barchart for every factor value
 
 fact_cols <- names(Filter(is.factor, train))
+i <- 0
+plots <- list()
 
 
 for (col in fact_cols){
-  plot <- plot_ly(data = train, x = ~get(col)) %>%
+  p <- plot_ly(data = train, x = ~get(col), type = "histogram") %>%
     layout(xaxis = list(title = col))
-  print(plot)
+  print(p)
 }
   
 
@@ -213,6 +219,67 @@ What type of waterpoint it is. Need to get information from the internet or stak
 
 ## waterpoint_type_group
 Mostly the sameas waterpoint_type. A little more generalized
+
+
+```{r Join labels}
+
+train <- train[train_labels, on = "id"]
+
+```
+
+
+
+
+# Hypotheses
+
+## Hypothesis 1: Pumps by the government are relatively more functional than the pumps funded by other contractors.
+
+```{r Hypo 1}
+
+hypo_1 <- copy(train)
+hypo_1[, .N, by = .(funder)][order(-N)]
+hypo_1[funder != "Government Of Tanzania", funder := "Other"]
+melted <- hypo_1[, .N, by = .(funder, status_group)][, rel := N / sum(N), by = .(funder)]
+casted <- dcast(melted, funder ~ status_group, value.var = "rel")
+casted <- casted %>%
+  droplevels() %>%
+  clean_names()
+
+
+fig <- plot_ly(data = casted, x = ~funder, y = ~functional, type = "bar", name = "functional") %>%
+  add_trace(y = ~functional_needs_repair, name = "functional needs repair") %>%
+  add_trace(y = ~non_functional, name = "non functional") %>%
+  layout(yaxis = list(title = "Relative count"), barmode = "stack")
+
+fig
+```
+
+Apparently we have more functional pumps with other contractors. Lets adjust the graphic to see the top 20 contractors with their relative functionalities.
+
+```{r Hypo 1 Addition}
+
+hypo_1_add <- copy(train)
+hypo_1_add[, .N, by = .(funder)][order(-N)]
+top_funders <- hypo_1_add[, .N, by = .(funder)][order(-N)][1:20][,funder]
+hypo_1_add[!funder %in% top_funders, funder := "Other"]
+melted <- hypo_1_add[, .N, by = .(funder, status_group)][, rel := N / sum(N), by = .(funder)]
+casted <- dcast(melted, funder ~ status_group, value.var = "rel")
+casted <- casted %>%
+  droplevels() %>%
+  clean_names()
+
+
+fig <- plot_ly(data = casted, x = ~funder, y = ~functional, type = "bar", name = "functional") %>%
+  add_trace(y = ~functional_needs_repair, name = "functional needs repair") %>%
+  add_trace(y = ~non_functional, name = "non functional") %>%
+  layout(yaxis = list(title = "Relative count"), barmode = "stack")
+
+fig
+```
+
+We can see only a slight difference in the contractors. Interesting is that the waterpoints funded by the german republic is mostly functional while the others are mostly under 50%.
+We keep this in mind for later steps. We could categorize the different funders in our preparation.
+
 
 
 
