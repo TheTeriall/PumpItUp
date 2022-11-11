@@ -313,10 +313,44 @@ cv <- cramerV(x = train$subvillage, y = train$region)
 
 print(paste0("Information Gain for Subvillage: ", ig_subv$importance, ". Information Gain for Region: ", ig_region$importance, ". CramersV: ", cv))
 
+
+
 ```
 
 We have a much higher information gain for the subvillage in comparison to the region. BUT we also have way more distinct subvillages. Therefore the information gain is not really meaningful.
 I additionally calculated the CramersV again to see if we have a strong association between those variables. As expected we have. Therefore we later need to see, if we can get rid of one of those variables.
+
+
+### Hypothesis 4: VWC's management has an major influence on the functionality of waterpoints.
+
+```{r}
+
+hypo_4 <- copy(train)
+hypo_4[, .N , by = .(scheme_management)][order(-N)]
+hypo_4[scheme_management != "VWC", scheme_management := "Other"]
+melted <- hypo_4[, .N, by = .(scheme_management, status_group)][, rel := N / sum(N), by = .(scheme_management)]
+casted <- dcast(melted, scheme_management ~ status_group, value.var = "rel")
+casted <- casted %>%
+  droplevels() %>%
+  clean_names()
+
+
+fig <- plot_ly(data = casted, x = ~scheme_management, y = ~functional, type = "bar", name = "functional") %>%
+  add_trace(y = ~functional_needs_repair, name = "functional needs repair") %>%
+  add_trace(y = ~non_functional, name = "non functional") %>%
+  layout(yaxis = list(title = "Relative count"), barmode = "stack")
+
+fig
+
+
+
+
+
+```
+
+
+We have no visible difference between the management of VWC and others.
+
 
 
 
