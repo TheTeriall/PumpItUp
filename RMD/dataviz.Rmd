@@ -20,6 +20,7 @@ library(clinUtils)
 library(janitor)
 library(rcompanion)
 library(DescTools)
+library(FSelectorRcpp)
 
 ```
 
@@ -300,7 +301,22 @@ for(col in fact_cols[fact_cols != "basin"]){
 ```
 
 The Cramer's V shows that we have a strong association between the basin and our variables lga und ward. We can therefore keep only one variable.
-We could use some techniques later to find out which variable has more information for our target (Maybe PCA?)
+We could use some techniques later to find out which variable has more information for our target (Maybe PCA, TheilsU?)
+
+## Hypothesis 3: The subvillage does not bring more information to the table than the region
+
+```{r}
+
+ig_subv <- information_gain(status_group ~ subvillage, data = train)
+ig_region <- information_gain(status_group ~ region, data = train)
+cv <- cramerV(x = train$subvillage, y = train$region)
+
+print(paste0("Information Gain for Subvillage: ", ig_subv$importance, ". Information Gain for Region: ", ig_region$importance, ". CramersV: ", cv))
+
+```
+
+We have a much higher information gain for the subvillage in comparison to the region. BUT we also have way more distinct subvillages. Therefore the information gain is not really meaningful.
+I additionally calculated the CramersV again to see if we have a strong association between those variables. As expected we have. Therefore we later need to see, if we can get rid of one of those variables.
 
 
 
