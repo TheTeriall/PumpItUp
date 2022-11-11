@@ -443,10 +443,35 @@ train[, payment_type := NULL]
 
 ```{r}
 
+train[, quantity_group := NULL]
+
+hypo_7 <- copy(train)
+
+melted <- hypo_7[, .N, by = .(quantity, status_group)]
+casted <- dcast(melted, quantity ~ status_group, value.var = "N")
+casted <- casted %>%
+  droplevels() %>%
+  clean_names()
+
+
+fig <- plot_ly(data = casted, x = ~quantity, y = ~functional, type = "bar", name = "functional") %>%
+  add_trace(y = ~functional_needs_repair, name = "functional needs repair") %>%
+  add_trace(y = ~non_functional, name = "non functional") %>%
+  layout(yaxis = list(title = "Relative count"), barmode = "stack")
+
+fig
+
+
+
+
+
+
+
+
 ```
 
 
-
+We can see that dry pumps are almost exclusively non functional, while other quantities can differ between functional and non functional.
 
 
 
