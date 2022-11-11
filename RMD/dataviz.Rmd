@@ -97,6 +97,124 @@ plot_ly(data = train, x = ~log(population), type = "histogram") %>%
 
 ```
 
+```{r Categorical Analysis}
+
+# Plot a barchart for every factor value
+
+fact_cols <- names(Filter(is.factor, train))
+
+
+for (col in fact_cols){
+  plot <- plot_ly(data = train, x = ~get(col)) %>%
+    layout(xaxis = list(title = col))
+  print(plot)
+}
+  
+
+
+
+
+```
+
+
+## funder
+We have a lot of different funders for all the pumps. The government is funding most of the pumps while other funders only have a few.
+It may be possible that the pumps funded by the government are more functional than the pumps funded by private(?) companies
+### Hypothesis 1: Pumps by the government are relatively more functional than the pumps funded by other contractors.
+
+## Installer
+Like the funders. The installer DWE has installed most of the pumps. 3655 pumps have no installer. We could have a look how the DWS installer influences the functionality.
+Missing Data
+
+## wpt_name
+wpt_name is the name of the waterpoint if there is one. We can see that some waterpoints are more common than others. We should not focus on the insight here.
+
+## basin
+We only have a few basins which are mostly evenly distributed. We could try to get more insights later here. Maybe find association with other variables
+### Hypothesis 2: The basin is associated with other variables in the dataset (Cramér's V)
+
+## subvillage
+We have a lot of different subvillage in our dataset. No insight to gain here.
+
+## region
+In comparison to the subvillage, we have fewer regions. This could come in handy, when we don´t want to use the subvillage in our data
+### Hypothesis 3: The subvillage does not bring more information to the table than the region
+
+## region_code
+The region code is a little more accurate than the region. We should have a look if there is a difference in information gain later on.
+
+## district_code
+Similar to region code
+
+## lga
+Also geographic location. Similar to ther geographic informations in the dataset.
+
+## ward
+Also geographic location. Similar to ther geographic informations in the dataset.
+
+## recorded_by
+Only one value. Can be deleted
+
+## scheme_management
+Who operates the waterpoint. VWC has a lot more waterpoints than the rest of managements. We could have a look if there is a difference in functionality
+### Hypothesis 4: VWC's management has an major influence on the functionality of waterpoints.
+
+## scheme_name: 
+A lot of different management companies. Too many to gain information. 
+Can be deleted
+
+## extraction_type
+Different groups of extraction types. We could get information about the functionality by extraction type
+
+## extraction_type_group
+See extraction_type
+
+## extraction_type_class
+See extraction_type
+### Hypothesis 5: The functionality is evenly distributed between all the extraction type columns 
+
+## management
+Like the scheme_management
+
+## management_group
+More generalized like that management
+
+## payment
+Information how the water is paid for.
+
+## payment_type
+Should be very similar to payment. 
+### Hypothesis 6: The payment and payment time is redundand.
+
+## water_quality
+Mostly soft water in the wells. Sometimes salty. Rest is distributed
+
+## quality_group
+A little more generalized than the water_quality
+
+## quantity
+Information about the quantity of water. We should see if the quanitity is changing whether the pump is functional or not.
+### Hypothesis 7: The quanity is associated to the functionality of the pump.
+
+## quantity_group
+Same as quantity. Can be deleted
+
+## source
+Where the water is coming from. Mostly from river, shallow well, spring or machines
+
+## source_type
+More generalized than source
+
+## source_class
+More generalized than source_type
+
+## waterpoint_type
+What type of waterpoint it is. Need to get information from the internet or stakeholders on what influence this could have
+
+## waterpoint_type_group
+Mostly the sameas waterpoint_type. A little more generalized
+
+
 
 
 
